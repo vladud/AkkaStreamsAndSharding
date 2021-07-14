@@ -71,14 +71,12 @@ namespace AkkaStreamsAndSharding
                 Console.WriteLine("Press any key to start sending ticks");
                 Console.ReadKey();
 
-                Console.WriteLine("Sending ticks... valid ones will be displayed as they are received");
-
                 new TaskFactory().StartNew(() =>
                  {
                      while (!_cts.IsCancellationRequested)
                      {
-                         Enumerable.Range(0, _numberOfGraphs).ForEach(i => { _shardRegion.Tell(new Tick(i, Rnd.NextDouble(), Rnd.NextDouble())); });
-                         Thread.Sleep(_sleepInBetweenTicks);
+                         Enumerable.Range(0, _numberOfGraphs).ForEach(i => { _shardRegion.Tell(new StartMessage(i)); });
+                         Thread.Sleep(1000);
                      }
                  }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             }

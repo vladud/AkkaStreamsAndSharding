@@ -15,9 +15,9 @@ namespace AkkaStreamsAndSharding.Streams
         {
             ActorMaterializer MaterializerFactory() => Context.Materializer();
 
-            var source = GraphBuilder.BuildAndRunGraph(MaterializerFactory);
+            GraphBuilder.BuildAndRunGraph(MaterializerFactory, message.InstrumentId);
 
-            Context.Sender.Tell(new GraphMessage(message.InstrumentId, source));
+            //Context.Sender.Tell(new GraphMessage(message.InstrumentId, source));
         }
     }
 }
