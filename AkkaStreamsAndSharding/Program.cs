@@ -16,10 +16,12 @@ namespace AkkaStreamsAndSharding
 {
     class Program
     {
+        private const string DefaultAutoDownAfter = "5s";
         private const int ShardsPerNodeFactor = 10;
         private static readonly Random Rnd = new Random();
 
         private static int? _port;
+        private static string _autoDownAfter;
         private static bool _shouldSendTicks;
         private static int _numberOfGraphs;
         private static int _sleepInBetweenTicks;
@@ -42,12 +44,14 @@ namespace AkkaStreamsAndSharding
             }
 
             _shouldSendTicks = bool.Parse(args.Length > 1 ? args[1] : ConfigurationManager.AppSettings["ShouldSendTicks"]);
-            _numberOfGraphs = int.Parse(ConfigurationManager.AppSettings["NumberOfGraphs"]);
+            _numberOfGraphs = int.Parse(args.Length > 2 ? args[2] : ConfigurationManager.AppSettings["NumberOfGraphs"]);
+            _autoDownAfter = args.Length > 3 ? args[3] : DefaultAutoDownAfter;
             _sleepInBetweenTicks = int.Parse(ConfigurationManager.AppSettings["SleepInBetweenTicks"]);
             _numberOfGraphBuilderRoutees = int.Parse(ConfigurationManager.AppSettings["NumberOfGraphBuilderRoutees"]);
 
             Init();
 
+            Console.WriteLine($"Port={_port}\nSendingTicks={_shouldSendTicks}\nNumberOfGraphs={_numberOfGraphs}\nAutoDownAfter={_autoDownAfter??string.Empty}");
             Console.WriteLine("Press any key to stop cluster node");
             Console.ReadKey();
 
@@ -78,10 +82,6 @@ namespace AkkaStreamsAndSharding
                      }
                  }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             }
-            //else
-            //{
-            //    await Task.CompletedTask;
-            //}
         }
 
         private static async Task Stop()
@@ -99,8 +99,11 @@ namespace AkkaStreamsAndSharding
             var shardingAkkaConfig = customAkkaConfig.GetConfig("custom.sharding");
             if (_port.HasValue)
             {
-                shardingAkkaConfig = ConfigurationFactory.ParseString($"akka.remote.dot-netty.tcp {{ port = {_port} }}").WithFallback(shardingAkkaConfig);
+                shardingAkkaConfig = ConfigurationFactory.ParseString($"akka.remote.dot-netty.tcp.port={_port}").WithFallback(shardingAkkaConfig);
             }
+            
+            shardingAkkaConfig = ConfigurationFactory.ParseString($"akka.cluster.auto-down-unreachable-after={_autoDownAfter}").WithFallback(shardingAkkaConfig);
+            
             _shardActorSystem = ActorSystem.Create("sharding-system", shardingAkkaConfig);
 
             var props = Props.Create(() => new StreamSourceActor(_graphBuildingRouter));
