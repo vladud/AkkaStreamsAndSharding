@@ -3,7 +3,7 @@ $configuration='Release'
 $pathToExe = "$currentLocation\bin\$configuration\AkkaStreamsAndSharding.exe"
 if (-not(Test-Path $pathToExe)) { 
     echo "Running msbuild..."
-    msbuild /m:4 /t:build /p:Configuration=$configuration /p:Optimize=True AkkaStreamsAndSharding.csproj
+    msbuild -p:RestorePackagesConfig=true -t:restore /m:4 /t:build /p:Configuration=$configuration /p:Optimize=True "..\AkkaStreamsAndSharding.sln"
 }
 echo $pathToExe
 
