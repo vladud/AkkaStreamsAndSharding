@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AkkaStreamsAndSharding", "AkkaStreamsAndSharding\AkkaStreamsAndSharding.csproj", "{E49530D8-9DD4-418F-B4C6-B2BE3B5B213B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E49530D8-9DD4-418F-B4C6-B2BE3B5B213B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E49530D8-9DD4-418F-B4C6-B2BE3B5B213B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E49530D8-9DD4-418F-B4C6-B2BE3B5B213B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E49530D8-9DD4-418F-B4C6-B2BE3B5B213B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B0879344-1D24-489F-B6EA-B7F27FD24936}
+	EndGlobalSection
+EndGlobal
