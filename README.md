@@ -12,3 +12,6 @@ Scenarios
 ** The cluster is also formed ok if no messages are being sent until both nodes are joined. If the input starts after both nodes are up then the sharding works as expected
 
 There are powershell scripts included to run all these scenarios.
+
+
+*** This project uses separate actor systems for the graph and the sharding. While testing there was huge performance issues in building the graph (just running materialize on it) when using the ActorMaterializer from inside the sharding actor system (see StreamSourceWithInternalGraphBuildingActor for example)
