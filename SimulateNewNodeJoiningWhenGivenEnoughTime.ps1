@@ -1,6 +1,6 @@
 $currentLocation = Get-Location
 $configuration='Release'
-$pathToExe = "$currentLocation\AkkaStreamsAndSharding\bin\$configuration\AkkaStreamsAndSharding.exe"
+$pathToExe = "$currentLocation\AkkaStreamsAndSharding\bin\$configuration\net5.0\AkkaStreamsAndSharding.exe"
 if (-not(Test-Path $pathToExe)) { 
     echo "Running msbuild..."
     msbuild -p:RestorePackagesConfig=true -t:restore /m:4 /t:build /p:Configuration=$configuration /p:Optimize=True "AkkaStreamsAndSharding.sln"
