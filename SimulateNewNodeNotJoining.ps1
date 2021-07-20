@@ -8,7 +8,7 @@ if (-not(Test-Path $pathToExe)) {
 echo $pathToExe
 
 #Start first instance
-Start-Process -FilePath $pathToExe -ArgumentList "5005 true 200 5s"
+Start-Process -FilePath $pathToExe -ArgumentList "5005 true 500 5s"
 Start-Sleep -Milliseconds 500
 
 $wshell = New-Object -ComObject wscript.shell
@@ -27,7 +27,7 @@ $wshell.SendKeys('2')
 Start-Sleep -Milliseconds 10000
 
 #Start node 1
-Start-Process -FilePath $pathToExe -ArgumentList "5006 false 200 5s"
+Start-Process -FilePath $pathToExe -ArgumentList "5006 false 500 5s"
 Start-Sleep -Milliseconds 500
 
 $wshell = New-Object -ComObject wscript.shell

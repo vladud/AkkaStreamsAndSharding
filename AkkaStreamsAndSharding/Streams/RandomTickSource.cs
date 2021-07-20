@@ -1,60 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Collections.Concurrent;
+using Akka.Event;
 using Akka.Streams;
 using Akka.Streams.Stage;
-using Akka.Util;
 using AkkaStreamsAndSharding.Common;
-using DotNetty.Common;
 
 namespace AkkaStreamsAndSharding.Streams
 {
     public class RandomTickSource : GraphStage<SourceShape<Tick>>
     {
         private readonly int _instrumentId;
+        private readonly ConcurrentQueue<Tick> _queue;
+        private readonly ILoggingAdapter _log;
 
         private sealed class Logic : GraphStageLogic
         {
-            private readonly Queue<Tick> _queue;
-            private readonly CancellationTokenSource _cts;
-
-            public Logic(RandomTickSource stage, int instrumentId) : base(stage.Shape)
+            public Logic(RandomTickSource stage, int instrumentId, ConcurrentQueue<Tick> queue, ILoggingAdapter log) : base(stage.Shape)
             {
-                _queue = new Queue<Tick>();
-                _cts = new CancellationTokenSource();
-                new TaskFactory().StartNew(() =>
-                {
-                    while (!_cts.IsCancellationRequested)
-                    {
-                        var tick = new Tick(instrumentId, ThreadLocalRandom.Current.NextDouble(), ThreadLocalRandom.Current.NextDouble());
-                        _queue.Enqueue(tick);
-                        Thread.Sleep(ThreadLocalRandom.Current.Next(1000, 10000));
-                    }
-                }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-
                 SetHandler(stage.Out, 
                     onPull: () =>
                     {
-                        while (_queue.Count == 0)
+                        Tick tick;
+                        while (!queue.TryDequeue(out tick))
                         {
-                            Thread.Sleep(1000);
+                            Push(stage.Out, new Tick(0, 0, 0));
+                            return;
                         }
-                        
-                        Push(stage.Out, _queue.Dequeue());
-                        Console.WriteLine($"Pushing tick for InstrumentId={instrumentId}");
+
+                        //var tick = new Tick(instrumentId, ThreadLocalRandom.Current.NextDouble(), ThreadLocalRandom.Current.NextDouble());
+
+                        Push(stage.Out, tick);
+                        log.Info($"Pushing tick for InstrumentId={instrumentId}");
                     },
                     onDownstreamFinish: () =>
                     {
-                        Console.WriteLine("OnDownstreamFinished.");
-                        _cts.Cancel();
+                        log.Info("OnDownstreamFinished.");
                     });
             }
         }
 
-        public RandomTickSource(int instrumentId)
+        public RandomTickSource(int instrumentId, ConcurrentQueue<Tick> queue, ILoggingAdapter log)
         {
             _instrumentId = instrumentId;
+            _queue = queue;
+            _log = log;
             Shape = new SourceShape<Tick>(Out);
         }
 
@@ -62,6 +50,6 @@ namespace AkkaStreamsAndSharding.Streams
 
         public override SourceShape<Tick> Shape { get; }
 
-        protected override GraphStageLogic CreateLogic(Attributes inheritedAttributes) => new Logic(this, _instrumentId);
+        protected override GraphStageLogic CreateLogic(Attributes inheritedAttributes) => new Logic(this, _instrumentId, _queue, _log);
     }
 }

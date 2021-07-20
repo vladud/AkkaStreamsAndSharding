@@ -1,4 +1,5 @@
 ﻿using Akka.Actor;
+using Akka.Event;
 using Akka.Streams;
 using AkkaStreamsAndSharding.Common;
 
@@ -15,9 +16,7 @@ namespace AkkaStreamsAndSharding.Streams
         {
             ActorMaterializer MaterializerFactory() => Context.Materializer();
 
-            GraphBuilder.BuildAndRunGraph(MaterializerFactory, message.InstrumentId);
-
-            //Context.Sender.Tell(new GraphMessage(message.InstrumentId, source));
+            GraphBuilder.BuildAndRunGraph(MaterializerFactory, Context.GetLogger(), message.InstrumentId);
         }
     }
 }

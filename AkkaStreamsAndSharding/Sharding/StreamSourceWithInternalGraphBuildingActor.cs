@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Threading.Tasks;
-using Akka;
 using Akka.Actor;
 using Akka.Cluster.Sharding;
+using Akka.Event;
 using Akka.Streams;
-using Akka.Streams.Dsl;
 using AkkaStreamsAndSharding.Common;
 using AkkaStreamsAndSharding.Streams;
 
@@ -14,6 +12,8 @@ namespace AkkaStreamsAndSharding.Sharding
     {
         private readonly int _instrumentId;
         private bool _isStarted = false;
+
+        private readonly ILoggingAdapter _log = Context.GetLogger();
 
         public StreamSourceWithInternalGraphBuildingActor()
         {
@@ -25,9 +25,9 @@ namespace AkkaStreamsAndSharding.Sharding
                 if (!_isStarted)
                 {
                     ActorMaterializer MaterializerFactory() => Context.System.Materializer();
-                    GraphBuilder.BuildAndRunGraph(MaterializerFactory, _instrumentId);
+                    GraphBuilder.BuildAndRunGraph(MaterializerFactory, _log, _instrumentId);
 
-                    Console.WriteLine($"Actor started! InstrumentId={_instrumentId}");
+                    _log.Info($"Actor started! InstrumentId={_instrumentId}");
                 }
             });
             Receive<StopMessage>(_ => Context.Parent.Tell(new Passivate(PoisonPill.Instance)));
