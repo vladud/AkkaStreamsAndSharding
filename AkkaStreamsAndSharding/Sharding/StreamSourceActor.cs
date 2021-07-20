@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 using Akka;
 using Akka.Actor;
 using Akka.Cluster.Sharding;
+using Akka.Event;
 using Akka.Streams;
 using Akka.Streams.Dsl;
 using AkkaStreamsAndSharding.Common;
-using Hyperion.Internal;
 
 namespace AkkaStreamsAndSharding.Sharding
 {
@@ -15,6 +15,8 @@ namespace AkkaStreamsAndSharding.Sharding
         private readonly IActorRef _graphBuildingRouter;
         private int _instrumentId;
         private (ISourceQueueWithComplete<Tick>, Source<Tick, NotUsed>) _source;
+
+        private readonly ILoggingAdapter _log = Context.GetLogger();
 
         public StreamSourceActor(IActorRef graphBuildingRouter)
         {
@@ -33,7 +35,7 @@ namespace AkkaStreamsAndSharding.Sharding
 
         private void HandleGraphSourceMessage(GraphMessage graph)
         {
-            Console.WriteLine($"Received graph for {graph.Key}");
+            _log.Info($"Received graph for {graph.Key}");
             _source = graph.Source;
             UnbecomeStacked();
         }
@@ -42,7 +44,7 @@ namespace AkkaStreamsAndSharding.Sharding
         {
             if (_source == (null, null))
             {
-                Console.WriteLine("Source is not set yet and I received tick!!!");
+                _log.Info("Source is not set yet and I received tick!!!");
                 return;
             }
 
@@ -51,7 +53,7 @@ namespace AkkaStreamsAndSharding.Sharding
 
         protected override void PreStart()
         {
-            Console.WriteLine($"Asking for graph for {_instrumentId}");
+            _log.Info($"Asking for graph for {_instrumentId}");
             _graphBuildingRouter.Tell(new NeedGraphMessage(_instrumentId));
         }
 
